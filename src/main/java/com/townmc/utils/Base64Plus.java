@@ -4,10 +4,9 @@ import java.io.*;
 import java.util.Random;
 
 /**
- * Created by meng on 2015/10/13.
+ * Created by meng on 2017/7/12.
  */
-
-public final class Base64Plus {
+public class Base64Plus {
     /**
      * Base64编码表。
      */
@@ -270,5 +269,4 @@ public final class Base64Plus {
         }
         return result;
     }
-
 }
