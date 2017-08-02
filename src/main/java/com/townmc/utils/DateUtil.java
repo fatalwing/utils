@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class DateUtil {
 	public final static String FULL_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";// 时间精确到年月日时分秒
@@ -12,12 +13,14 @@ public class DateUtil {
 	public final static String DATE_MINUTE_PATTERN = "yyyy-MM-dd HH:mm";// 时间精确到年月日小时
 	public final static String NOT_SEPARATOR_DATE_PATTERN = "yyyyMMdd";// 时间精确到年月日，没有分隔符
 
+	public static enum TIME_ZONE {UTC, GMT, CST}
+
 	public DateUtil() {
 	}
 
 	/**
 	 * 将时间转换成规定格式的字符串
-	 * 
+	 *
 	 * @param pattern
 	 *            String 格式
 	 * @param date
@@ -28,11 +31,27 @@ public class DateUtil {
 		SimpleDateFormat format = new SimpleDateFormat(pattern);
 		return format.format(date);
 	}
-	
+
+	/**
+	 * 获得UTC时间
+	 * @return
+	 */
+	public static Date utcDate() {
+		// 1、取得本地时间：
+		Calendar cal = Calendar.getInstance() ;
+		// 2、取得时间偏移量：
+		int zoneOffset = cal.get(Calendar.ZONE_OFFSET);
+		// 3、取得夏令时差：
+		int dstOffset = cal.get(Calendar.DST_OFFSET);
+		// 4、从本地时间里扣除这些差量，即可以取得UTC时间：
+		cal.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
+
+		return cal.getTime() ;
+	}
 
 	/**
 	 * 将当前时间转换成字符串
-	 * 
+	 *
 	 * @return String 转换后的时间字符串
 	 */
 	public static String currenDateToString() {
@@ -41,7 +60,7 @@ public class DateUtil {
 
 	/**
 	 * 将当前时间转换成指定格式的字符串
-	 * 
+	 *
 	 * @param pattern
 	 *            String 指定格式
 	 * @return String 转换后的时间字符串
@@ -52,7 +71,7 @@ public class DateUtil {
 
 	/**
 	 * 比较两日期是否相等
-	 * 
+	 *
 	 * @param pattern
 	 *            String 格式
 	 * @param sFirstDate
@@ -69,7 +88,7 @@ public class DateUtil {
 
 	/**
 	 * 格式化日期
-	 * 
+	 *
 	 * @param pattern
 	 *            String 格式
 	 * @param sDate
@@ -89,7 +108,7 @@ public class DateUtil {
 
 	/**
 	 * 功能：滚动日期
-	 * 
+	 *
 	 * @param date
 	 *            Date 需要滚动的日期
 	 * @param field
@@ -107,7 +126,7 @@ public class DateUtil {
 
 	/**
 	 * 设置时间
-	 * 
+	 *
 	 * @param date
 	 *            Date 设置的时间
 	 * @param field
@@ -125,7 +144,7 @@ public class DateUtil {
 
 	/**
 	 * 获得时间中的字段的值
-	 * 
+	 *
 	 * @param field
 	 *            int 时间字段（参照Calendar的字段）
 	 * @return int 时间字段值

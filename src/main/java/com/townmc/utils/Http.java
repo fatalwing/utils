@@ -268,37 +268,6 @@ public class Http {
         }
     }
 
-    public String uploadFile(String url, File file) {
-        String re = null;
-        HttpPost post = new HttpPost(url);
-        if(this.header != null && !this.header.isEmpty()) {
-            for(Map.Entry<String, String> entry : this.header.entrySet()) {
-                post.addHeader(entry.getKey(), entry.getValue());
-            }
-        }
-        FileBody fileBody = new FileBody(file);
-        MultipartEntity entity = new MultipartEntity();
-        entity.addPart("file", fileBody);
-        post.setEntity(entity);
-        HttpResponse response;
-        try {
-            response = httpClient.execute(post);
-            if(HttpStatus.SC_OK==response.getStatusLine().getStatusCode()){
-
-                HttpEntity entitys = response.getEntity();
-                if (entity != null) {
-                    re = (EntityUtils.toString(entitys));
-                }
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        httpClient.getConnectionManager().shutdown();
-        return re;
-    }
-
     public String uploadFile(String url, String name, File file) {
         //File file = new File(textFileName, ContentType.DEFAULT_BINARY);
         String re = null;
