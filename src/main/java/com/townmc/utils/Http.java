@@ -25,8 +25,11 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BestMatchSpecFactory;
@@ -293,6 +296,39 @@ public class Http {
             e.printStackTrace();
         }
         httpClient.getConnectionManager().shutdown();
+        return re;
+    }
+
+    public String uploadFile(String url, String name, File file) {
+        //File file = new File(textFileName, ContentType.DEFAULT_BINARY);
+        String re = null;
+        HttpPost post = new HttpPost(url);
+        if(this.header != null && !this.header.isEmpty()) {
+            for(Map.Entry<String, String> entry : this.header.entrySet()) {
+                post.addHeader(entry.getKey(), entry.getValue());
+            }
+        }
+        FileBody fileBody = new FileBody(file);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        builder.addPart(name, fileBody);
+        HttpEntity entity = builder.build();
+        post.setEntity(entity);
+        HttpResponse response;
+        try {
+            response = httpClient.execute(post);
+            if(HttpStatus.SC_OK==response.getStatusLine().getStatusCode()){
+
+                HttpEntity entitys = response.getEntity();
+                if (entity != null) {
+                    re = (EntityUtils.toString(entitys));
+                }
+            }
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return re;
     }
 
