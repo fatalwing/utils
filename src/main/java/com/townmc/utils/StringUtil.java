@@ -1,11 +1,13 @@
 package com.townmc.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
 import java.math.BigDecimal;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -49,6 +51,73 @@ public class StringUtil {
         return result;
     }
 
+    /**
+     * HMAC加密
+     * @param data 需要加密的字节数组
+     * @param key 密钥
+     * @return 字节数组
+     */
+    public static byte[] encryptHMAC(byte[] data, String key) {
+        SecretKey secretKey;
+        byte[] bytes = null;
+        try {
+            secretKey = new SecretKeySpec(Base64Plus.encode(key.getBytes()).getBytes(), "HmacSHA1");
+            Mac mac = Mac.getInstance(secretKey.getAlgorithm());
+            mac.init(secretKey);
+            bytes = mac.doFinal(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bytes;
+    }
+
+    /**
+     * HMAC加密
+     * @param data 需要加密的字符串
+     * @param key 密钥
+     * @return 字符串
+     */
+    public static String encryptHMAC(String data, String key) {
+        if (StringUtil.isBlank(data)) {
+            return null;
+        }
+        byte[] bytes = encryptHMAC(data.getBytes(), key);
+        return byteArrayToHexString(bytes);
+    }
+
+    /**
+     * 转换字节数组为十六进制字符串
+     * @param bytes 字节数组
+     * @return 十六进制字符串
+     */
+    private static String byteArrayToHexString(byte[] bytes) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append(byteToHexString(bytes[i]));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 全局数组
+     */
+    private final static String[] hexDigits = { "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
+    /**
+     * 将一个字节转化成十六进制形式的字符串
+     * @param b 字节数组
+     * @return 字符串
+     */
+    private static String byteToHexString(byte b) {
+        int ret = b;
+        //System.out.println("ret = " + ret);
+        if (ret < 0) {
+            ret += 256;
+        }
+        int m = ret / 16;
+        int n = ret % 16;
+        return hexDigits[m] + hexDigits[n];
+    }
 
     public static String sha1(String decript) {
         try {
@@ -260,6 +329,19 @@ public class StringUtil {
             }
         }
         return result;
+    }
+
+    public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
+        String aaa = "GET&%2F&AccessKeyId%3Dtestid%26Action%3DDescribeCdnService%26Format%3DJSON%26SignatureMethod%3DHMAC-SHA1%26SignatureNonce%3D9b7a44b0-3be1-11e5-8c73-08002700c460%26SignatureVersion%3D1.0%26TimeStamp%3D2015-08-06T02%253A19%253A46Z%26Version%3D2014-11-11";
+        String key = "testsecret&";
+
+        javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA1");
+        mac.init(new javax.crypto.spec.SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA1"));
+        byte[] signData = mac.doFinal(aaa.getBytes("UTF-8"));
+
+        String signature = new String(Base64Plus.encode(signData));
+
+        System.out.println(signature);
     }
 
 }
