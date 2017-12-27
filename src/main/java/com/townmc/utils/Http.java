@@ -14,6 +14,7 @@ import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -46,6 +47,7 @@ public class Http {
     private HttpClient httpClient = null;
     private HttpClientContext context = null;
     private Map<String, String> header = null;
+    private RequestConfig requestConfig = null;
 
     public Http() {
         this.httpClient = HttpClients.createDefault();
@@ -53,6 +55,13 @@ public class Http {
         this.setContext();
         this.header = new HashMap<String, String>();
 
+    }
+
+    public Http(RequestConfig requestConfig) {
+        this.requestConfig = requestConfig;
+        this.httpClient = HttpClients.createDefault();
+        this.setContext();
+        this.header = new HashMap<String, String>();
     }
 
     public void addHeader(String key, String value) {
@@ -65,6 +74,12 @@ public class Http {
 
     public void removeHeader(String key) {
         this.header.remove(key);
+    }
+
+    public void setTimeout(int connectTimeout, int requestTimeout, int socketTimeout) {
+        requestConfig = RequestConfig.custom().setConnectTimeout(connectTimeout)
+                .setConnectionRequestTimeout(requestTimeout)
+                .setSocketTimeout(socketTimeout).build();;
     }
 
     private UrlEncodedFormEntity getUrlEncodedFormEntity(Map<String, String> parameterMap) {
@@ -127,6 +142,7 @@ public class Http {
         }
 
         HttpPost httpPost = new HttpPost(url);
+        if(requestConfig != null) httpPost.setConfig(requestConfig);
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
                 httpPost.addHeader(entry.getKey(), entry.getValue());
@@ -162,6 +178,7 @@ public class Http {
         }
 
         HttpPost httpPost = new HttpPost(url);
+        if(requestConfig != null) httpPost.setConfig(requestConfig);
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
                 httpPost.addHeader(entry.getKey(), entry.getValue());
@@ -203,6 +220,7 @@ public class Http {
             }
         }
         HttpGet httpGet = new HttpGet(url);
+        if(requestConfig != null) httpGet.setConfig(requestConfig);
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
                 httpGet.addHeader(entry.getKey(), entry.getValue());
@@ -272,6 +290,7 @@ public class Http {
         //File file = new File(textFileName, ContentType.DEFAULT_BINARY);
         String re = null;
         HttpPost post = new HttpPost(url);
+        if(requestConfig != null) post.setConfig(requestConfig);
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
                 post.addHeader(entry.getKey(), entry.getValue());
