@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.Random;
 
 /**
+ * base64 增强类
  * Created by meng on 2017/7/12.
  */
 public class Base64Plus {
@@ -168,10 +169,21 @@ public class Base64Plus {
         return ret;
     }
 
+    /**
+     * Base64解码成String对象
+     * @param code
+     * @return
+     */
     public static String decodeToString(String code) {
         return new String(decode(code));
     }
 
+    /**
+     * 通过key对字符串进行加密
+     * @param txt
+     * @param key
+     * @return
+     */
     public static String passportEncrypt(String txt, String key) {
         Random random = new Random();
         random.setSeed(System.currentTimeMillis());
@@ -190,6 +202,12 @@ public class Base64Plus {
         return Base64Plus.encode(passportKey.getBytes());
     }
 
+    /**
+     * 解密某个加密过的字符串
+     * @param txt
+     * @param key
+     * @return
+     */
     public static String passportDecrypt(String txt, String key) {
         byte[] bytes = null;
         try {

@@ -99,7 +99,7 @@ public class Http {
             Object value = ent.getValue();
             str += "&" + ent.getKey() + "=" + URLEncoder.encode(value.toString(), "UTF-8");
         }
-        str = str.substring(1);
+        if(str.startsWith("&")) str = str.substring(1);
         return str;
     }
 
