@@ -154,4 +154,81 @@ public class DateUtil {
 		return calendar.get(field);
 	}
 
+	/**
+	 * 两个时间的差距。目前支持秒、分钟、小时、天、月、年
+	 * 两个时间参数不分前后。效果一样。
+	 * @param one 第一个时间
+	 * @param two 第二个时间
+	 * @param precision 精度 与Calendar中的常量定义对应 13表示秒 12表示分钟 11表示小时 6表示天 2表示月 1表示年
+	 * @return
+	 */
+	public static long difference(Date one, Date two, int precision) {
+		if (null == one || null == two) {
+			throw new LogicException("parameter_is_null", "日期参数不能为空");
+		}
+
+		Calendar calOne = Calendar.getInstance();
+		calOne.setTime(one.compareTo(two) < 0 ? one : two);
+
+		Calendar calTwo = Calendar.getInstance();
+		calTwo.setTime(one.compareTo(two) < 0 ? two : one);
+
+		long diffYear = 0;
+		long diffMonth = 0;
+		long diffDay = 0;
+		long diffHour = 0;
+		long diffMinute = 0;
+		long diffSecond = 0;
+
+		// 计算年的间隔
+		diffYear = calTwo.get(Calendar.YEAR) - calOne.get(Calendar.YEAR);
+
+		// 计算天的间隔
+		diffDay = diffYear * 365 + calTwo.get(Calendar.DAY_OF_YEAR) - calOne.get(Calendar.DAY_OF_YEAR);
+		// 碰上闰年要多加一天
+		for(int i = calOne.get(Calendar.YEAR); i < calTwo.get(Calendar.YEAR); i++) {
+			if (i % 4 == 0 && i % 100 != 0 || i % 400 == 0) {
+				diffDay++;
+			}
+		}
+
+		// 计算月的间隔
+		diffMonth = (diffYear * 12) + calTwo.get(Calendar.MONTH) - calOne.get(Calendar.MONTH);
+
+		// 计算小时间隔
+		diffHour = (diffDay * 24) + calTwo.get(Calendar.HOUR_OF_DAY) - calOne.get(Calendar.HOUR_OF_DAY);
+
+		// 计算分钟间隔
+		diffMinute = (diffHour * 60) + calTwo.get(Calendar.MINUTE) - calOne.get(Calendar.MINUTE);
+
+		// 计算秒间隔
+		diffSecond = (diffMinute * 60) + calTwo.get(Calendar.SECOND) - calOne.get(Calendar.SECOND);
+
+		long result = 0;
+		switch (precision) {
+			case Calendar.YEAR:
+				result = diffYear;
+				break;
+			case Calendar.MONTH:
+				result = diffMonth;
+				break;
+			case Calendar.DAY_OF_YEAR:
+				result = diffDay;
+				break;
+			case Calendar.HOUR_OF_DAY:
+				result = diffHour;
+				break;
+			case Calendar.MINUTE:
+				result = diffMinute;
+				break;
+			case Calendar.SECOND:
+				result = diffSecond;
+				break;
+			default:
+				throw new LogicException("parameter_precision_not_support", "精度参数不支持。仅支持：1年份2月份6天数11小时12分钟13秒");
+		}
+
+		return result;
+	}
+
 }

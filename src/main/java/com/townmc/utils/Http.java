@@ -97,6 +97,7 @@ public class Http {
         String str = "";
         for(Entry<String, String> ent : parameterMap.entrySet()) {
             Object value = ent.getValue();
+            if(null == value) value = "";
             str += "&" + ent.getKey() + "=" + URLEncoder.encode(value.toString(), "UTF-8");
         }
         if(str.startsWith("&")) str = str.substring(1);
