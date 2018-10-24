@@ -173,12 +173,7 @@ public class DateUtil {
 		Calendar calTwo = Calendar.getInstance();
 		calTwo.setTime(one.compareTo(two) < 0 ? two : one);
 
-		long diffYear = 0;
-		long diffMonth = 0;
-		long diffDay = 0;
-		long diffHour = 0;
-		long diffMinute = 0;
-		long diffSecond = 0;
+		long diffYear, diffMonth, diffDay, diffHour, diffMinute, diffSecond = 0;
 
 		// 计算年的间隔
 		diffYear = calTwo.get(Calendar.YEAR) - calOne.get(Calendar.YEAR);
@@ -186,7 +181,7 @@ public class DateUtil {
 		// 计算天的间隔
 		diffDay = diffYear * 365 + calTwo.get(Calendar.DAY_OF_YEAR) - calOne.get(Calendar.DAY_OF_YEAR);
 		// 碰上闰年要多加一天
-		for(int i = calOne.get(Calendar.YEAR); i < calTwo.get(Calendar.YEAR); i++) {
+		for (int i = calOne.get(Calendar.YEAR); i < calTwo.get(Calendar.YEAR); i++) {
 			if (i % 4 == 0 && i % 100 != 0 || i % 400 == 0) {
 				diffDay++;
 			}
