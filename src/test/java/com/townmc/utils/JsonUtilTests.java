@@ -17,14 +17,6 @@ public class JsonUtilTests {
 
         Map<String, Object> re = JsonUtil.json2Object(jsonTxt, Map.class);
 
-        System.out.println(re.get("name"));
-        System.out.println(re.get("age"));
-        System.out.println(((List)re.get("list")).get(1));
-        System.out.println(((Map)re.get("map")).get("k2"));
-
-        System.out.println("=============");
-
         String json = JsonUtil.object2Json(re);
-        System.out.println(json);
     }
 }

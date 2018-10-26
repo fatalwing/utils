@@ -1,5 +1,8 @@
 package com.townmc.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,6 +18,7 @@ import java.util.List;
  * Created by meng on 2015-1-27.
  */
 public class StringUtil {
+    private static final Log log = LogFactory.getLog(StringUtil.class);
 
     /**
      * 生成uuid
@@ -110,7 +114,6 @@ public class StringUtil {
      */
     private static String byteToHexString(byte b) {
         int ret = b;
-        //System.out.println("ret = " + ret);
         if (ret < 0) {
             ret += 256;
         }
@@ -341,7 +344,7 @@ public class StringUtil {
 
         String signature = new String(Base64Plus.encode(signData));
 
-        System.out.println(signature);
+        log.info(signature);
     }
 
 }
