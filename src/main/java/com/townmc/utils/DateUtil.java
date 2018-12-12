@@ -19,20 +19,6 @@ public class DateUtil {
 	}
 
 	/**
-	 * 将时间转换成规定格式的字符串
-	 *
-	 * @param pattern
-	 *            String 格式
-	 * @param date
-	 *            Date 需要转换的时间
-	 * @return String 转换后的时间字符串
-	 */
-	public static String dateToString(String pattern, Date date) {
-		SimpleDateFormat format = new SimpleDateFormat(pattern);
-		return format.format(date);
-	}
-
-	/**
 	 * 获得UTC时间
 	 * @return
 	 */
@@ -54,7 +40,7 @@ public class DateUtil {
 	 *
 	 * @return String 转换后的时间字符串
 	 */
-	public static String currenDateToString() {
+	public static String dateToString() {
 		return dateToString(FULL_TIME_PATTERN, new Date());
 	}
 
@@ -65,8 +51,22 @@ public class DateUtil {
 	 *            String 指定格式
 	 * @return String 转换后的时间字符串
 	 */
-	public static String currenDateToString(String pattern) {
+	public static String dateToString(String pattern) {
 		return dateToString(pattern, new Date());
+	}
+
+	/**
+	 * 将时间转换成规定格式的字符串
+	 *
+	 * @param pattern
+	 *            String 格式
+	 * @param date
+	 *            Date 需要转换的时间
+	 * @return String 转换后的时间字符串
+	 */
+	public static String dateToString(String pattern, Date date) {
+		SimpleDateFormat format = new SimpleDateFormat(pattern);
+		return format.format(date);
 	}
 
 	/**

@@ -27,9 +27,9 @@ public class XmlUtilTests {
 
         map.put("e", ii);
 
-        log.info(XmlUtil.map2Xml(map, true));
+        log.info(XmlUtil.map2Xml(map, true, "merchant"));
 
-        log.info(XmlUtil.map2Xml(map, false));
+        log.info(XmlUtil.map2Xml(map, false, "merchant"));
     }
 
     @Test

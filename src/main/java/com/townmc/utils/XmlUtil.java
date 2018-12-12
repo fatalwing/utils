@@ -97,12 +97,24 @@ public class XmlUtil {
      * @return xml字符串
      */
     public static String map2Xml(Map<String, Object> map, boolean isCDATA){
-        String parentName = "xml";
+        String rootName = "xml";
+        return map2Xml(map, isCDATA, rootName);
+    }
+
+    /**
+     * (多层)map转换为xml格式字符串
+     *
+     * @param map 需要转换为xml的map
+     * @param isCDATA 是否加入CDATA标识符 true:加入 false:不加入
+     * @return xml字符串
+     */
+    public static String map2Xml(Map<String, Object> map, boolean isCDATA, String rootName){
         Document doc = DocumentHelper.createDocument();
-        doc.addElement(parentName);
-        String xml = map2Xml(doc.getRootElement(), parentName, map, isCDATA);
+        doc.addElement(rootName);
+        String xml = map2Xml(doc.getRootElement(), rootName, map, isCDATA);
         return formatXML(xml);
     }
+
 
     /**
      * multilayerMapToXml核心方法，递归调用

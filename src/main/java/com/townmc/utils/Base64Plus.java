@@ -225,6 +225,38 @@ public class Base64Plus {
         return tmp;
     }
 
+
+    /**
+     * token加密
+     * @param token
+     * @param key
+     * @return
+     */
+    public static String tokenEncrypt(String token, String key) {
+
+        String re = passportEncrypt(token, key);
+        re = re.replaceAll("\\+", "-");
+        re = re.replaceAll("/", "*");
+        re = re.replaceAll("=", "_");
+
+        return re;
+    }
+
+    /**
+     * token解密
+     * @param token
+     * @param key
+     * @return
+     */
+    public static String tokenDecrypt(String token, String key) {
+
+        token = token.replaceAll("-", "+");
+        token = token.replaceAll("\\*", "/");
+        token = token.replaceAll("_", "=");
+
+        return passportDecrypt(token, key);
+    }
+
     private static String passportKey(String txt, String key) {
         String encryptKey = md5(key);
         int ctr = 0;
@@ -287,4 +319,5 @@ public class Base64Plus {
         }
         return result;
     }
+
 }
