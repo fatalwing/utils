@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.Vector;
 
 public class DateUtil {
 	public final static String FULL_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";// 时间精确到年月日时分秒
@@ -55,6 +56,19 @@ public class DateUtil {
 		return dateToString(pattern, new Date());
 	}
 
+    /**
+     * 将时间转换成规定格式的字符串
+     *
+     * @param pattern
+     *            String 格式
+     * @param date
+     *            Date 需要转换的时间
+     * @return String 转换后的时间字符串
+     */
+    public static String dateToString(String pattern, Date date) {
+        return dateToString(pattern, new Date(), null);
+    }
+
 	/**
 	 * 将时间转换成规定格式的字符串
 	 *
@@ -62,10 +76,13 @@ public class DateUtil {
 	 *            String 格式
 	 * @param date
 	 *            Date 需要转换的时间
+     * @Param zone
+     *            TimeZone 时区
 	 * @return String 转换后的时间字符串
 	 */
-	public static String dateToString(String pattern, Date date) {
+	public static String dateToString(String pattern, Date date, TimeZone zone) {
 		SimpleDateFormat format = new SimpleDateFormat(pattern);
+		if (null != zone) format.setTimeZone(zone);
 		return format.format(date);
 	}
 
@@ -225,5 +242,17 @@ public class DateUtil {
 
 		return result;
 	}
+
+    public static String[] fecthAllTimeZoneIds() {
+        Vector v = new Vector();
+        String[] ids = TimeZone.getAvailableIDs();
+        for (int i = 0; i < ids.length; i++) {
+            v.add(ids[i]);
+        }
+        java.util.Collections.sort(v, String.CASE_INSENSITIVE_ORDER);
+        v.copyInto(ids);
+        v = null;
+        return ids;
+    }
 
 }
