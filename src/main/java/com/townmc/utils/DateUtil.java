@@ -66,7 +66,7 @@ public class DateUtil {
      * @return String 转换后的时间字符串
      */
     public static String dateToString(String pattern, Date date) {
-        return dateToString(pattern, new Date(), null);
+        return dateToString(pattern, date, null);
     }
 
 	/**
