@@ -334,17 +334,37 @@ public class StringUtil {
         return result;
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, InvalidKeyException {
-        String aaa = "GET&%2F&AccessKeyId%3Dtestid%26Action%3DDescribeCdnService%26Format%3DJSON%26SignatureMethod%3DHMAC-SHA1%26SignatureNonce%3D9b7a44b0-3be1-11e5-8c73-08002700c460%26SignatureVersion%3D1.0%26TimeStamp%3D2015-08-06T02%253A19%253A46Z%26Version%3D2014-11-11";
-        String key = "testsecret&";
+    public static String trim(String str, char c) {
+        char[] chars = str.toCharArray();
+        int len = chars.length;
+        int st = 0;
+        while ( (st < len) && (chars[st] == c) ){
+            st ++;
+        }
+        while ( (st < len) && (chars[len-1] == c) ){
+            len --;
+        }
+        return (st >0) && (len<chars.length)? str.substring(st, len): str;
+    }
 
-        javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA1");
-        mac.init(new javax.crypto.spec.SecretKeySpec(key.getBytes("UTF-8"), "HmacSHA1"));
-        byte[] signData = mac.doFinal(aaa.getBytes("UTF-8"));
+    public static String ltrim(String str, char c) {
+        char[] chars = str.toCharArray();
+        int len = chars.length;
+        int st = 0;
+        while ( (st < len) && (chars[st] == c) ){
+            st ++;
+        }
+        return (st >0)? str.substring(st, len): str;
+    }
 
-        String signature = new String(Base64Plus.encode(signData));
-
-        log.info(signature);
+    public static String rtrim(String str, char c) {
+        char[] chars = str.toCharArray();
+        int len = chars.length;
+        int st = 0;
+        while ( (st < len) && (chars[len-1] == c) ){
+            len --;
+        }
+        return (len<chars.length)? str.substring(st, len): str;
     }
 
 }
