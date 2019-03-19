@@ -48,6 +48,7 @@ public class Http {
     private HttpClientContext context = null;
     private Map<String, String> header = null;
     private RequestConfig requestConfig = null;
+    private Charset charset = null;
 
     public Http() {
         this.httpClient = HttpClients.createDefault();
@@ -74,6 +75,10 @@ public class Http {
 
     public void removeHeader(String key) {
         this.header.remove(key);
+    }
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
     }
 
     public void setTimeout(int connectTimeout, int requestTimeout, int socketTimeout) {
@@ -105,9 +110,12 @@ public class Http {
     }
 
     private String transferString(HttpEntity entity) throws IllegalStateException, IOException {
-        Charset charset = ContentType.getOrDefault(entity).getCharset();
-
-        if(null == charset) charset = Charset.forName("UTF-8");
+        if (null == this.charset) {
+            this.charset = ContentType.getOrDefault(entity).getCharset();
+        }
+        if(null == this.charset) {
+            this.charset = Charset.forName("UTF-8");
+        }
         InputStream is = entity.getContent();
         StringBuffer sb = new StringBuffer();
         BufferedReader br = new BufferedReader(new InputStreamReader(is, charset));
