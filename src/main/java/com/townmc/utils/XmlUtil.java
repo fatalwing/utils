@@ -127,8 +127,9 @@ public class XmlUtil {
      */
     private static String map2Xml(Element element, String parentName, Map<String, Object> map, boolean isCDATA) {
         Element xmlElement = element.addElement(parentName);
-        map.keySet().forEach(key -> {
-            Object obj = map.get(key);
+        for(Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object obj = entry.getValue();
             if (obj instanceof Map) {
                 map2Xml(xmlElement, key, (Map<String, Object>)obj, isCDATA);
             } else {
@@ -139,7 +140,7 @@ public class XmlUtil {
                     xmlElement.addElement(key).addText(value);
                 }
             }
-        });
+        }
         return xmlElement.asXML();
     }
 
