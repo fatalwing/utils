@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.townmc</groupId>
-    <artifactId>utils</artifactId>
+    <artifactId>townmc-utils</artifactId>
     <version>2.14</version>
 
     <dependencies>

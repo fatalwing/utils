@@ -28,10 +28,8 @@ import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BestMatchSpecFactory;
@@ -110,7 +108,7 @@ public class Http {
         return str;
     }
 
-    private String transferString(HttpEntity entity) throws IllegalStateException, IOException {
+    private byte[] transferByte(HttpEntity entity) throws IllegalStateException, IOException {
         if (null == this.charset) {
             this.charset = ContentType.getOrDefault(entity).getCharset();
         }
@@ -127,10 +125,9 @@ public class Http {
         }
         is.close();
 
-        String result = output.toString(StandardCharsets.UTF_8.name());
         output.close();
 
-        return result;
+        return output.toByteArray();
     }
 
     /**
@@ -152,6 +149,21 @@ public class Http {
      * @return response body
      */
     public String post(String url, Map<String, String> param) {
+        try {
+            return new String(this.postx(url, param), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
+     * post 请求
+     * @param url 地址
+     * @param param 参数
+     * @return response body
+     */
+    public byte[] postx(String url, Map<String, String> param) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -171,11 +183,26 @@ public class Http {
 
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity != null) {
-                return transferString(httpEntity);
+                return transferByte(httpEntity);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * post 请求
+     * @param url 地址
+     * @param body 参数
+     * @return response body
+     */
+    public String post(String url, String body) {
+        try {
+            return new String(this.postx(url, body), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return "";
@@ -187,7 +214,7 @@ public class Http {
      * @param body 参数
      * @return response body
      */
-    public String post(String url, String body) {
+    public byte[] postx(String url, String body) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -206,11 +233,27 @@ public class Http {
 
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity != null) {
-                return transferString(httpEntity);
+                return transferByte(httpEntity);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * get 请求
+     * @param url 地址
+     * @param param 参数
+     * @return response body
+     */
+    public String get(String url, Map<String, String> param) {
+
+        try {
+            return new String(this.getx(url, param), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         return "";
@@ -222,7 +265,7 @@ public class Http {
      * @param param 参数
      * @return response body
      */
-    public String get(String url, Map<String, String> param) {
+    public byte[] getx(String url, Map<String, String> param) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -245,7 +288,7 @@ public class Http {
             HttpResponse response = httpClient.execute(httpGet, context);
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity != null) {
-                return transferString(httpEntity);
+                return transferByte(httpEntity);
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -253,7 +296,7 @@ public class Http {
             e.printStackTrace();
         }
 
-        return "";
+        return null;
     }
 
     /**
@@ -263,6 +306,15 @@ public class Http {
      */
     public String get(String url) {
         return this.get(url, null);
+    }
+
+    /**
+     * get 请求
+     * @param url 地址
+     * @return response body
+     */
+    public byte[] getx(String url) {
+        return this.getx(url, null);
     }
 
     public void getFile(String url, String destFileName) {
