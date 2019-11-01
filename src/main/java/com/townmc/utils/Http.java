@@ -3,6 +3,7 @@ package com.townmc.utils;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,14 +118,19 @@ public class Http {
             this.charset = Charset.forName("UTF-8");
         }
         InputStream is = entity.getContent();
-        StringBuffer sb = new StringBuffer();
-        BufferedReader br = new BufferedReader(new InputStreamReader(is, charset));
-        String line = null;
-        while ((line = br.readLine()) != null) {
-            sb.append(line);
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] temp = new byte[1024];
+        int length;
+        while((length = is.read(temp)) != -1) {
+            output.write(temp, 0, length);
         }
         is.close();
-        return sb.toString();
+
+        String result = output.toString(StandardCharsets.UTF_8.name());
+        output.close();
+
+        return result;
     }
 
     /**
