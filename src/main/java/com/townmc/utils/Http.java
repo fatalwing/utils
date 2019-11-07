@@ -27,9 +27,11 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BestMatchSpecFactory;
@@ -86,23 +88,55 @@ public class Http {
                 .setSocketTimeout(socketTimeout).build();;
     }
 
-    private UrlEncodedFormEntity getUrlEncodedFormEntity(Map<String, String> parameterMap) {
+    private HttpEntity getUrlEncodedFormEntity(Map<String, Object> parameterMap) {
+
         List<NameValuePair> param = new ArrayList<NameValuePair>();
-        for(Entry<String, String> paramEntry : parameterMap.entrySet()) {
-            param.add(new BasicNameValuePair(paramEntry.getKey(), (String)paramEntry.getValue()));
+        for(Entry<String, Object> paramEntry : parameterMap.entrySet()) {
+            Object val = paramEntry.getValue();
+            String value = "";
+            if (val instanceof String) value = (String)val;
+            else value = String.valueOf(val);
+
+            param.add(new BasicNameValuePair(paramEntry.getKey(), value));
         }
         return new UrlEncodedFormEntity(param, Consts.UTF_8);
     }
 
-    private String getQueryString(Map<String, String> parameterMap) throws UnsupportedEncodingException {
+    private HttpEntity getMultipartEntity(Map<String, Object> parameterMap) {
+
+        //创建 MultipartEntityBuilder,以此来构建我们的参数
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        //设置字符编码，防止乱码
+        ContentType contentType = ContentType.create("text/plain",Charset.forName("UTF-8"));
+        //填充我们的文本内容，这里相当于input 框中的 name 与value
+        for(Map.Entry<String, Object> entry: parameterMap.entrySet()) {
+            String key = entry.getKey();
+            Object val = entry.getValue();
+
+            if (val instanceof String) {
+                entityBuilder.addPart(key, new StringBody((String)val, contentType));
+            } else if (val instanceof Number) {
+                entityBuilder.addPart(key, new StringBody(String.valueOf(val), contentType));
+            } else if (val instanceof File) {
+                entityBuilder.addBinaryBody(key, (File)val);
+            } else if (val instanceof byte[]) {
+                entityBuilder.addBinaryBody(key, (byte[])val, ContentType.DEFAULT_BINARY, StringUtil.uuid());
+            } else if (val instanceof InputStream) {
+                entityBuilder.addBinaryBody(key, (InputStream)val, ContentType.DEFAULT_BINARY, StringUtil.uuid());
+            }
+        }
+        return entityBuilder.build();
+    }
+
+    private String getQueryString(Map<String, Object> parameterMap) throws UnsupportedEncodingException {
         if(null == parameterMap || parameterMap.size() == 0) {
             return "";
         }
         String str = "";
-        for(Entry<String, String> ent : parameterMap.entrySet()) {
+        for(Entry<String, Object> ent : parameterMap.entrySet()) {
             Object value = ent.getValue();
             if(null == value) value = "";
-            str += "&" + ent.getKey() + "=" + URLEncoder.encode(value.toString(), "UTF-8");
+            str += "&" + ent.getKey() + "=" + URLEncoder.encode(String.valueOf(value), "UTF-8");
         }
         if(str.startsWith("&")) str = str.substring(1);
         return str;
@@ -143,27 +177,25 @@ public class Http {
     }
 
     /**
-     * post 请求
-     * @param url 地址
-     * @param param 参数
-     * @return response body
+     * 发送post请求
+     * 默认为application/x-www-form-urlencoded方式提交请求
+     * @param url 请求地址
+     * @param param 请求参数
+     * @return
      */
-    public String post(String url, Map<String, String> param) {
-        try {
-            return new String(this.postx(url, param), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return "";
+    public byte[] post(String url, Map<String, Object> param) {
+        return this.post(url, param, false);
     }
 
     /**
-     * post 请求
-     * @param url 地址
-     * @param param 参数
-     * @return response body
+     * 发送post请求
+     * @param url 请求地址
+     * @param param 请求参数
+     * @param isMutipart 是否使用 multipart/form-data 方式提交
+     *                   为 false 时 用application/x-www-form-urlencoded方式提交
+     * @return
      */
-    public byte[] postx(String url, Map<String, String> param) {
+    public byte[] post(String url, Map<String, Object> param, boolean isMutipart) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -176,7 +208,14 @@ public class Http {
             }
         }
 
-        httpPost.setEntity(this.getUrlEncodedFormEntity(param));
+        HttpEntity requestEntiry;
+        if (isMutipart) {
+            requestEntiry = this.getMultipartEntity(param);
+        } else {
+            requestEntiry = this.getUrlEncodedFormEntity(param);
+        }
+
+        httpPost.setEntity(requestEntiry);
 
         try {
             HttpResponse response = httpClient.execute(httpPost, context);
@@ -193,28 +232,7 @@ public class Http {
         return null;
     }
 
-    /**
-     * post 请求
-     * @param url 地址
-     * @param body 参数
-     * @return response body
-     */
-    public String post(String url, String body) {
-        try {
-            return new String(this.postx(url, body), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    /**
-     * post 请求
-     * @param url 地址
-     * @param body 参数
-     * @return response body
-     */
-    public byte[] postx(String url, String body) {
+    public byte[] post(String url, String body) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -249,23 +267,7 @@ public class Http {
      * @param param 参数
      * @return response body
      */
-    public String get(String url, Map<String, String> param) {
-
-        try {
-            return new String(this.getx(url, param), StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    /**
-     * get 请求
-     * @param url 地址
-     * @param param 参数
-     * @return response body
-     */
-    public byte[] getx(String url, Map<String, String> param) {
+    public byte[] get(String url, Map<String, Object> param) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -304,87 +306,8 @@ public class Http {
      * @param url 地址
      * @return response body
      */
-    public String get(String url) {
+    public byte[] get(String url) {
         return this.get(url, null);
-    }
-
-    /**
-     * get 请求
-     * @param url 地址
-     * @return response body
-     */
-    public byte[] getx(String url) {
-        return this.getx(url, null);
-    }
-
-    public void getFile(String url, String destFileName) {
-        HttpGet httpGet = new HttpGet(url);
-        if(this.header != null && !this.header.isEmpty()) {
-            for(Map.Entry<String, String> entry : this.header.entrySet()) {
-                httpGet.addHeader(entry.getKey(), entry.getValue());
-            }
-        }
-        InputStream ins = null;
-        File file = new File(destFileName);
-        FileOutputStream fout = null;
-        try {
-            HttpResponse response = httpClient.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-
-            ins = entity.getContent();
-            fout = new FileOutputStream(file);
-            int l = -1;
-            byte[] tmp = new byte[1024];
-            while ((l = ins.read(tmp)) != -1) {
-                fout.write(tmp, 0, l);
-                // 注意这里如果用OutputStream.write(buff)的话，图片会失真，大家可以试试
-            }
-            fout.flush();
-        } catch(Exception ex) {
-
-        } finally {
-            // 关闭低层流。
-            try {
-                ins.close();
-                fout.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public String uploadFile(String url, String name, File file) {
-        //File file = new File(textFileName, ContentType.DEFAULT_BINARY);
-        String re = null;
-        HttpPost post = new HttpPost(url);
-        if(requestConfig != null) post.setConfig(requestConfig);
-        if(this.header != null && !this.header.isEmpty()) {
-            for(Map.Entry<String, String> entry : this.header.entrySet()) {
-                post.addHeader(entry.getKey(), entry.getValue());
-            }
-        }
-        FileBody fileBody = new FileBody(file);
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        builder.addPart(name, fileBody);
-        HttpEntity entity = builder.build();
-        post.setEntity(entity);
-        HttpResponse response;
-        try {
-            response = httpClient.execute(post);
-            if(HttpStatus.SC_OK==response.getStatusLine().getStatusCode()){
-
-                HttpEntity entitys = response.getEntity();
-                if (entity != null) {
-                    re = (EntityUtils.toString(entitys));
-                }
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return re;
     }
 
     public String postWithCer(String httpsUrl, String xmlStr, String keyFile, String keyPassWord) throws Exception {
@@ -421,7 +344,7 @@ public class Http {
 
             try {
                 HttpEntity entity = response.getEntity();
-                String jsonStr = toStringInfo(response.getEntity(),"UTF-8");
+                String jsonStr = new String(this.transferByte(response.getEntity()));
 
                 //微信返回的报文时GBK，直接使用httpcore解析乱码
                 //  String jsonStr = EntityUtils.toString(response.getEntity(),"UTF-8");
@@ -436,41 +359,8 @@ public class Http {
 
     }
 
-
-    private String toStringInfo(HttpEntity entity, String defaultCharset) throws Exception, IOException{
-        final InputStream instream = entity.getContent();
-        if (instream == null) {
-            return null;
-        }
-        try {
-            Args.check(entity.getContentLength() <= Integer.MAX_VALUE,
-                    "HTTP entity too large to be buffered in memory");
-            int i = (int)entity.getContentLength();
-            if (i < 0) {
-                i = 4096;
-            }
-            Charset charset = null;
-
-            if (charset == null) {
-                charset = Charset.forName(defaultCharset);
-            }
-            if (charset == null) {
-                charset = org.apache.http.protocol.HTTP.DEF_CONTENT_CHARSET;
-            }
-            final Reader reader = new InputStreamReader(instream, charset);
-            final CharArrayBuffer buffer = new CharArrayBuffer(i);
-            final char[] tmp = new char[1024];
-            int l;
-            while((l = reader.read(tmp)) != -1) {
-                buffer.append(tmp, 0, l);
-            }
-            return buffer.toString();
-        } finally {
-            instream.close();
-        }
-    }
-
     public void close() {
         // nothing now
     }
+
 }

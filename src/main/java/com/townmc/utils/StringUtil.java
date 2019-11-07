@@ -12,7 +12,9 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by meng on 2015-1-27.
@@ -365,6 +367,36 @@ public class StringUtil {
             len --;
         }
         return (len<chars.length)? str.substring(st, len): str;
+    }
+
+    public static String queryStringValue(String queryString, String param) {
+        int start = queryString.indexOf(param + "=");
+        start = start + param.length()+1;
+
+        if (start == -1) return null;
+
+        int andStart = queryString.substring(start).indexOf("&");
+        int end = andStart != -1 ? start + andStart : queryString.length();
+
+        String value = queryString.substring(start, end);
+        return value;
+    }
+
+    public static Map<String, String> queryStringMap(String queryString) {
+        if (isBlank(queryString)) return null;
+
+        String[] pairArr = queryString.split("&");
+
+        Map<String, String> map = new HashMap<>();
+
+        for(String pair : pairArr) {
+            String[] kv = pair.split("=");
+            if (kv != null && kv.length == 2) {
+                map.put(kv[0], kv[1]);
+            }
+        }
+
+        return map;
     }
 
 }
