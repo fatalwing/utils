@@ -3,7 +3,6 @@ package com.townmc.utils;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +26,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.FormBodyPart;
-import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -38,8 +34,6 @@ import org.apache.http.impl.cookie.BestMatchSpecFactory;
 import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.Args;
-import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
@@ -164,6 +158,16 @@ public class Http {
         return output.toByteArray();
     }
 
+    private Map<String, String> transferHeader(Header[] headers) {
+        Map<String, String> map = new HashMap<>();
+        if (null != headers && headers.length > 0) {
+            for (Header header : headers) {
+                map.put(header.getName(), header.getValue());
+            }
+        }
+        return map;
+    }
+
     /**
      * 设置上下文
      */
@@ -183,7 +187,7 @@ public class Http {
      * @param param 请求参数
      * @return
      */
-    public byte[] post(String url, Map<String, Object> param) {
+    public HttpRes post(String url, Map<String, Object> param) {
         return this.post(url, param, false);
     }
 
@@ -195,7 +199,7 @@ public class Http {
      *                   为 false 时 用application/x-www-form-urlencoded方式提交
      * @return
      */
-    public byte[] post(String url, Map<String, Object> param, boolean isMutipart) {
+    public HttpRes post(String url, Map<String, Object> param, boolean isMutipart) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -216,23 +220,25 @@ public class Http {
         }
 
         httpPost.setEntity(requestEntiry);
-
+        HttpRes res = new HttpRes();
         try {
             HttpResponse response = httpClient.execute(httpPost, context);
+            res.setStatus(response.getStatusLine().getStatusCode());
+            res.setHeaders(this.transferHeader(response.getAllHeaders()));
 
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity != null) {
-                return transferByte(httpEntity);
+                res.setData(transferByte(httpEntity));
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return res;
     }
 
-    public byte[] post(String url, String body) {
+    public HttpRes post(String url, String body) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -246,19 +252,22 @@ public class Http {
         }
         httpPost.setEntity(new StringEntity(body, Consts.UTF_8));
 
+        HttpRes res = new HttpRes();
         try {
             HttpResponse response = httpClient.execute(httpPost, context);
+            res.setStatus(response.getStatusLine().getStatusCode());
+            res.setHeaders(this.transferHeader(response.getAllHeaders()));
 
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity != null) {
-                return transferByte(httpEntity);
+                res.setData(transferByte(httpEntity));
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return res;
     }
 
     /**
@@ -267,7 +276,7 @@ public class Http {
      * @param param 参数
      * @return response body
      */
-    public byte[] get(String url, Map<String, Object> param) {
+    public HttpRes get(String url, Map<String, Object> param) {
         if(!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
@@ -280,6 +289,7 @@ public class Http {
             }
         }
         HttpGet httpGet = new HttpGet(url);
+        HttpRes res = new HttpRes();
         if(requestConfig != null) httpGet.setConfig(requestConfig);
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
@@ -288,9 +298,12 @@ public class Http {
         }
         try {
             HttpResponse response = httpClient.execute(httpGet, context);
+            res.setStatus(response.getStatusLine().getStatusCode());
+            res.setHeaders(this.transferHeader(response.getAllHeaders()));
+
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity != null) {
-                return transferByte(httpEntity);
+                res.setData(transferByte(httpEntity));
             }
         } catch (ClientProtocolException e) {
             e.printStackTrace();
@@ -298,7 +311,7 @@ public class Http {
             e.printStackTrace();
         }
 
-        return null;
+        return res;
     }
 
     /**
@@ -306,7 +319,7 @@ public class Http {
      * @param url 地址
      * @return response body
      */
-    public byte[] get(String url) {
+    public HttpRes get(String url) {
         return this.get(url, null);
     }
 

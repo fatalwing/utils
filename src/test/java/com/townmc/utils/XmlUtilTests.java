@@ -12,7 +12,7 @@ import java.util.Map;
 public class XmlUtilTests {
     private static final Log log = LogFactory.getLog(XmlUtilTests.class);
 
-    @Test
+    //@Test
     public void testMap2Xml() {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("a", "v1");
@@ -32,7 +32,7 @@ public class XmlUtilTests {
         log.info(XmlUtil.map2Xml(map, false, "merchant"));
     }
 
-    @Test
+    //@Test
     public void testXml2Map() {
         String xml = "<xml>\n" +
                 "    <a><![CDATA[v1]]></a>\n" +

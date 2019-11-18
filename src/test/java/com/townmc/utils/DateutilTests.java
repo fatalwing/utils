@@ -7,14 +7,14 @@ import java.util.TimeZone;
 
 public class DateutilTests {
 
-    @Test
+    //@Test
     public void fecthAllTimeZoneIds() {
         String[] res = DateUtil.fecthAllTimeZoneIds();
 
         System.out.println(JsonUtil.object2Json(res));
     }
 
-    @Test
+    //@Test
     public void test() {
         String date = DateUtil.dateToString(DateUtil.FULL_TIME_PATTERN, new Date(), TimeZone.getTimeZone("Canada/Eastern"));
         System.out.println(date);
