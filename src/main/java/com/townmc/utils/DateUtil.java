@@ -2,26 +2,45 @@ package com.townmc.utils;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.Vector;
+import java.util.*;
 
+/**
+ * 日期时间处理帮助类
+ * @author meng
+ */
 public class DateUtil {
-	public final static String FULL_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";// 时间精确到年月日时分秒
-	public final static String DATE_PATTERN = "yyyy-MM-dd";// 时间精确到年月日
-	public final static String DATE_HOUR_PATTERN = "yyyy-MM-dd HH";// 时间精确到年月日小时
-	public final static String DATE_MINUTE_PATTERN = "yyyy-MM-dd HH:mm";// 时间精确到年月日小时
-	public final static String NOT_SEPARATOR_DATE_PATTERN = "yyyyMMdd";// 时间精确到年月日，没有分隔符
+	/**
+	 * 时间精确到年月日时分秒
+	 */
+	public final static String FULL_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+	/**
+	 * 时间精确到年月日
+	 */
+	public final static String DATE_PATTERN = "yyyy-MM-dd";
+	/**
+	 * 时间精确到年月日小时
+	 */
+	public final static String DATE_HOUR_PATTERN = "yyyy-MM-dd HH";
+	/**
+	 * 时间精确到年月日小时
+	 */
+	public final static String DATE_MINUTE_PATTERN = "yyyy-MM-dd HH:mm";
+	/**
+	 * 时间精确到年月日，没有分隔符
+	 */
+	public final static String NOT_SEPARATOR_DATE_PATTERN = "yyyyMMdd";
 
-	public static enum TIME_ZONE {UTC, GMT, CST}
+	/**
+	 * 时间类型
+	 */
+	public enum TIME_ZONE {UTC, GMT, CST}
 
 	public DateUtil() {
 	}
 
 	/**
 	 * 获得UTC时间
-	 * @return
+	 * @return Date
 	 */
 	public static Date utcDate() {
 		// 1、取得本地时间：
@@ -82,7 +101,9 @@ public class DateUtil {
 	 */
 	public static String dateToString(String pattern, Date date, TimeZone zone) {
 		SimpleDateFormat format = new SimpleDateFormat(pattern);
-		if (null != zone) format.setTimeZone(zone);
+		if (null != zone) {
+			format.setTimeZone(zone);
+		}
 		return format.format(date);
 	}
 
@@ -177,7 +198,7 @@ public class DateUtil {
 	 * @param one 第一个时间
 	 * @param two 第二个时间
 	 * @param precision 精度 与Calendar中的常量定义对应 13表示秒 12表示分钟 11表示小时 6表示天 2表示月 1表示年
-	 * @return
+	 * @return long
 	 */
 	public static long difference(Date one, Date two, int precision) {
 		if (null == one || null == two) {
@@ -190,7 +211,7 @@ public class DateUtil {
 		Calendar calTwo = Calendar.getInstance();
 		calTwo.setTime(one.compareTo(two) < 0 ? two : one);
 
-		long diffYear, diffMonth, diffDay, diffHour, diffMinute, diffSecond = 0;
+		long diffYear, diffMonth, diffDay, diffHour, diffMinute, diffSecond;
 
 		// 计算年的间隔
 		diffYear = calTwo.get(Calendar.YEAR) - calOne.get(Calendar.YEAR);
@@ -216,7 +237,7 @@ public class DateUtil {
 		// 计算秒间隔
 		diffSecond = (diffMinute * 60) + calTwo.get(Calendar.SECOND) - calOne.get(Calendar.SECOND);
 
-		long result = 0;
+		long result;
 		switch (precision) {
 			case Calendar.YEAR:
 				result = diffYear;
@@ -243,16 +264,12 @@ public class DateUtil {
 		return result;
 	}
 
-    public static String[] fecthAllTimeZoneIds() {
-        Vector v = new Vector();
-        String[] ids = TimeZone.getAvailableIDs();
-        for (int i = 0; i < ids.length; i++) {
-            v.add(ids[i]);
-        }
-        java.util.Collections.sort(v, String.CASE_INSENSITIVE_ORDER);
+    public static String[] fetchAllTimeZoneIds() {
+		String[] ids = TimeZone.getAvailableIDs();
+		Vector<String> v = new Vector<>(Arrays.asList(ids));
+        v.sort(String.CASE_INSENSITIVE_ORDER);
         v.copyInto(ids);
-        v = null;
-        return ids;
+		return ids;
     }
 
 }

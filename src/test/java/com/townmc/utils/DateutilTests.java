@@ -9,7 +9,7 @@ public class DateutilTests {
 
     //@Test
     public void fecthAllTimeZoneIds() {
-        String[] res = DateUtil.fecthAllTimeZoneIds();
+        String[] res = DateUtil.fetchAllTimeZoneIds();
 
         System.out.println(JsonUtil.object2Json(res));
     }

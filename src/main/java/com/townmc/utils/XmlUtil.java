@@ -14,6 +14,10 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
 
+/**
+ * 使用dom4j处理xml帮助类
+ * @author meng
+ */
 public class XmlUtil {
     private static final Log log = LogFactory.getLog(XmlUtil.class);
 
@@ -28,16 +32,18 @@ public class XmlUtil {
 
     public static Map<String, Object> dom2Map(Document doc){
         Map<String, Object> map = new HashMap<String, Object>();
-        if(doc == null)
+        if(doc == null) {
             return map;
+        }
         Element root = doc.getRootElement();
         for (Iterator iterator = root.elementIterator(); iterator.hasNext();) {
             Element e = (Element) iterator.next();
             List list = e.elements();
             if(list.size() > 0){
                 map.put(e.getName(), dom2Map(e));
-            }else
+            }else {
                 map.put(e.getName(), e.getText());
+            }
         }
         return map;
     }
@@ -64,10 +70,10 @@ public class XmlUtil {
                             mapList.add(m);
                         }
                         map.put(iter.getName(), mapList);
-                    }else
+                    }else {
                         map.put(iter.getName(), m);
-                }
-                else{
+                    }
+                } else{
                     if(map.get(iter.getName()) != null){
                         Object obj = map.get(iter.getName());
                         if(!obj.getClass().getName().equals("java.util.ArrayList")){
@@ -80,12 +86,14 @@ public class XmlUtil {
                             mapList.add(iter.getText());
                         }
                         map.put(iter.getName(), mapList);
-                    }else
+                    }else {
                         map.put(iter.getName(), iter.getText());
+                    }
                 }
             }
-        }else
+        }else {
             map.put(e.getName(), e.getText());
+        }
         return map;
     }
 
@@ -106,6 +114,7 @@ public class XmlUtil {
      *
      * @param map 需要转换为xml的map
      * @param isCDATA 是否加入CDATA标识符 true:加入 false:不加入
+     * @param rootName 根节点名称
      * @return xml字符串
      */
     public static String map2Xml(Map<String, Object> map, boolean isCDATA, String rootName){

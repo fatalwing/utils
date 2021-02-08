@@ -22,15 +22,19 @@ public class Base64Plus {
     private static final byte[] BASE64DECODE = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1,
-            -1, // 注意两个63，为兼容SMP，
+            // 注意两个63，为兼容SMP，
+            -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, 63,
             -1,
-            63, // “/”和“-”都翻译成63。
+            // “/”和“-”都翻译成63。
+            63,
             52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, 0, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
             12, 13,
-            14, // 注意两个0：
+            // 注意两个0：
+            14,
             15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1,
-            -1, // “A”和“=”都翻译成0。
+            // “A”和“=”都翻译成0。
+            -1,
             -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
             -1, -1, -1, -1, -1};
 
@@ -64,6 +68,10 @@ public class Base64Plus {
 
     private static final int NUMBER_EIGHTEEN = 18;
 
+    private static final char EQUALS_CHAR = '=';
+
+    private static final String ZERO = "0";
+
     /**
      * 构造方法私有化，防止实例化。
      */
@@ -82,7 +90,7 @@ public class Base64Plus {
 
         // 按实际编码后长度开辟内存，加快速度
         int kengdie = (b.length - 1) / NUMBER_THREE;
-        StringBuffer sb = new StringBuffer(kengdie << (NUMBER_TWO + NUMBER_FOUR));
+        StringBuilder sb = new StringBuilder(kengdie << (NUMBER_TWO + NUMBER_FOUR));
 
         // 进行编码
         for (int i = 0; i < b.length; i++) {
@@ -99,10 +107,10 @@ public class Base64Plus {
         // 对于长度非3的整数倍的字节数组，编码前先补0，编码后结尾处编码用=代替，
         // =的个数和短缺的长度一致，以此来标识出数据实际长度
         if (b.length % NUMBER_THREE > 0) {
-            sb.setCharAt(sb.length() - 1, '=');
+            sb.setCharAt(sb.length() - 1, EQUALS_CHAR);
         }
         if (b.length % NUMBER_THREE == 1) {
-            sb.setCharAt(sb.length() - NUMBER_TWO, '=');
+            sb.setCharAt(sb.length() - NUMBER_TWO, EQUALS_CHAR);
         }
         return sb.toString();
     }
@@ -129,10 +137,10 @@ public class Base64Plus {
 
         // 统计填充的等号个数
         int pad = 0;
-        if (code.charAt(len - 1) == '=') {
+        if (code.charAt(len - 1) == EQUALS_CHAR) {
             pad++;
         }
-        if (code.charAt(len - NUMBER_TWO) == '=') {
+        if (code.charAt(len - NUMBER_TWO) == EQUALS_CHAR) {
             pad++;
         }
 
@@ -171,8 +179,8 @@ public class Base64Plus {
 
     /**
      * Base64解码成String对象
-     * @param code
-     * @return
+     * @param code 解码字符串
+     * @return String
      */
     public static String decodeToString(String code) {
         return new String(decode(code));
@@ -180,9 +188,9 @@ public class Base64Plus {
 
     /**
      * 通过key对字符串进行加密
-     * @param txt
-     * @param key
-     * @return
+     * @param txt 需要加密的内容
+     * @param key 加密key
+     * @return String
      */
     public static String passportEncrypt(String txt, String key) {
         Random random = new Random();
@@ -190,26 +198,26 @@ public class Base64Plus {
         String rand = "" + random.nextInt() % 32000;
         String encryptKey = md5(rand);
         int ctr = 0;
-        String tmp = "";
+        StringBuilder tmp = new StringBuilder();
         for (int i = 0; i < txt.length(); i++) {
             ctr = (ctr == encryptKey.length() ? 0 : ctr);
-            tmp += encryptKey.charAt(ctr);
+            tmp.append(encryptKey.charAt(ctr));
             char c = (char)(txt.charAt(i) ^ encryptKey.charAt(ctr));
-            tmp += c;
+            tmp.append(c);
             ctr++;
         }
-        String passportKey = passportKey(tmp, key);
+        String passportKey = passportKey(tmp.toString(), key);
         return Base64Plus.encode(passportKey.getBytes());
     }
 
     /**
      * 解密某个加密过的字符串
-     * @param txt
-     * @param key
-     * @return
+     * @param txt 需要解密的内容
+     * @param key 解密key
+     * @return String
      */
     public static String passportDecrypt(String txt, String key) {
-        byte[] bytes = null;
+        byte[] bytes;
         try {
             bytes = Base64Plus.decode(txt);
             txt = new String(bytes);
@@ -217,20 +225,20 @@ public class Base64Plus {
             return null;
         }
         txt = passportKey(txt, key);
-        String tmp = "";
+        StringBuilder tmp = new StringBuilder();
         for (int i = 0; i < txt.length(); i++) {
             char c = (char)(txt.charAt(i) ^ txt.charAt(++i));
-            tmp += c;
+            tmp.append(c);
         }
-        return tmp;
+        return tmp.toString();
     }
 
 
     /**
      * token加密
-     * @param token
-     * @param key
-     * @return
+     * @param token 加密目标token
+     * @param key 秘钥
+     * @return String
      */
     public static String tokenEncrypt(String token, String key) {
 
@@ -244,9 +252,9 @@ public class Base64Plus {
 
     /**
      * token解密
-     * @param token
-     * @param key
-     * @return
+     * @param token 解密目标token
+     * @param key 秘钥
+     * @return String
      */
     public static String tokenDecrypt(String token, String key) {
 
@@ -260,17 +268,22 @@ public class Base64Plus {
     private static String passportKey(String txt, String key) {
         String encryptKey = md5(key);
         int ctr = 0;
-        String tmp = "";
+        StringBuilder tmp = new StringBuilder();
         for(int i = 0; i < txt.length(); i++) {
             ctr = (ctr == encryptKey.length()) ? 0 : ctr;
             char c = (char)(txt.charAt(i) ^ encryptKey.charAt(ctr));
-            tmp += c;
+            tmp.append(c);
             ctr++;
         }
-        return tmp;
+        return tmp.toString();
     }
 
-    //序列化对象为String字符串，先对序列化后的结果进行BASE64编码，否则不能直接进行反序列化
+    /**
+     * 序列化对象为String字符串，先对序列化后的结果进行BASE64编码，否则不能直接进行反序列化
+     * @param o 序列化对象
+     * @return String
+     * @throws Exception 异常
+     */
     public static String writeObject(Object o) throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -279,13 +292,16 @@ public class Base64Plus {
         oos.close();
         bos.close();
         return encode(bos.toByteArray());
-        //return new String(bos.toByteArray(), "ISO-8859-1");
     }
 
-    //反序列化String字符串为对象
-    public static Object readObject(String object) throws Exception{
-        ByteArrayInputStream bis = new ByteArrayInputStream(decode(object));
-        //ByteArrayInputStream bis = new ByteArrayInputStream(object.getBytes("ISO-8859-1"));
+    /**
+     * 反序列化String字符串为对象
+     * @param  objectStr 序列化对象的字符串
+     * @return Object
+     * @throws Exception 异常
+     */
+    public static Object readObject(String objectStr) throws Exception{
+        ByteArrayInputStream bis = new ByteArrayInputStream(decode(objectStr));
         ObjectInputStream ois = new ObjectInputStream(bis);
         Object o = null;
         try {
@@ -300,24 +316,25 @@ public class Base64Plus {
     }
 
     private static String md5(String text) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         try {
             java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
             byte[] buf = text.getBytes();
             byte[] dig = md5.digest(buf);
-            String hex = null;
-            for (int i = 0; i < dig.length; i++) {
-                int n = dig[i] < 0 ? (256 + dig[i]) : dig[i];
+            String hex;
+            for (byte b : dig) {
+                int n = b < 0 ? (256 + b) : b;
                 hex = Integer.toHexString(n);
-                if (hex.length() < 2)
-                    hex = "0" + hex;
-                result += hex;
+                if (hex.length() < 2) {
+                    hex = ZERO + hex;
+                }
+                result.append(hex);
             }
         } catch (java.security.NoSuchAlgorithmException e) {
-            //e.printStackTrace();
             result = null;
         }
-        return result;
+        assert result != null;
+        return result.toString();
     }
 
 }

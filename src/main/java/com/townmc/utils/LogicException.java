@@ -1,50 +1,77 @@
 package com.townmc.utils;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
 /**
- * 系统逻辑错误
- * Created by meng on 2015-1-27.
+ * 系统逻辑异常
+ * @author meng
  */
-class LogicException extends RuntimeException {
+public class LogicException extends RuntimeException implements Supplier<LogicException> {
 
-    private static final long serialVersionUID = -7923892655400414209L;
+    private String errorCode;
 
-    protected String errorCode;
-    protected String errorMsg;
+    private String errorInfo;
 
-    public LogicException(String errorCode) {
-        super(errorCode);
+    private boolean i18 = false;
 
-        this.errorCode = errorCode;
-        this.errorMsg = "";
+    private LogicException() {
+
     }
 
-    public LogicException(String errorCode, String errorMsg) {
-        super(errorCode);
-
-        this.errorCode = errorCode;
-        this.errorMsg = errorMsg;
+    public LogicException(String message) {
+        super(message);
     }
 
-    public LogicException(String errorCode, String errorMsg, Throwable throwable) {
-        super(errorCode, throwable);
+    public LogicException(Throwable cause) {
+        super(cause);
+    }
+
+    public LogicException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public LogicException(String errorCode, String errorInfo, boolean i18) {
+        super("errorCode: " + errorCode + ", errorInfo: " + errorInfo);
         this.errorCode = errorCode;
-        this.errorMsg = errorMsg;
+        this.i18 = i18;
+
+        this.errorInfo = this.errorInfo(errorInfo);
+    }
+
+    public LogicException(String errorCode, String errorInfo) {
+        super("errorCode: " + errorCode + ", errorInfo: " + errorInfo);
+        this.errorCode = errorCode;
+
+        this.errorInfo = this.errorInfo(errorInfo);
+    }
+
+    public LogicException(String errorCode, String errorInfo, Throwable cause) {
+        super("errorCode: " + errorCode + ", errorInfo: " + errorInfo, cause);
+        this.errorCode = errorCode;
+        this.errorInfo = this.errorInfo(errorInfo);
+    }
+
+    private String errorInfo(String info) {
+        if (this.i18) {
+            // TODO: 国际化解析返回
+            return info;
+        } else {
+            return info;
+        }
+    }
+
+    public String getErrorInfo() {
+        return errorInfo;
     }
 
     public String getErrorCode() {
         return errorCode;
     }
 
-    public void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
+    @Override
+    public LogicException get() {
+        return new LogicException(Optional.of(this.getErrorCode()).orElse("system_error"),
+                Optional.of(this.getErrorInfo()).orElse("系统异常。by_exception"));
     }
-
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
-    public void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
-    }
-
 }

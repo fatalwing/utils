@@ -3,6 +3,7 @@ package com.townmc.utils;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,10 +39,14 @@ import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
 
+/**
+ * Http协议请求
+ * @author meng
+ */
 public class Http {
-    private HttpClient httpClient = null;
+    private final HttpClient httpClient;
     private HttpClientContext context = null;
-    private Map<String, String> header = null;
+    private final Map<String, String> header;
     private RequestConfig requestConfig = null;
     private Charset charset = null;
 
@@ -49,7 +54,7 @@ public class Http {
         this.httpClient = HttpClients.createDefault();
 
         this.setContext();
-        this.header = new HashMap<String, String>();
+        this.header = new HashMap<>();
 
     }
 
@@ -57,7 +62,7 @@ public class Http {
         this.requestConfig = requestConfig;
         this.httpClient = HttpClients.createDefault();
         this.setContext();
-        this.header = new HashMap<String, String>();
+        this.header = new HashMap<>();
     }
 
     public void addHeader(String key, String value) {
@@ -79,17 +84,20 @@ public class Http {
     public void setTimeout(int connectTimeout, int requestTimeout, int socketTimeout) {
         requestConfig = RequestConfig.custom().setConnectTimeout(connectTimeout)
                 .setConnectionRequestTimeout(requestTimeout)
-                .setSocketTimeout(socketTimeout).build();;
+                .setSocketTimeout(socketTimeout).build();
     }
 
     private HttpEntity getUrlEncodedFormEntity(Map<String, Object> parameterMap) {
 
-        List<NameValuePair> param = new ArrayList<NameValuePair>();
+        List<NameValuePair> param = new ArrayList<>();
         for(Entry<String, Object> paramEntry : parameterMap.entrySet()) {
             Object val = paramEntry.getValue();
-            String value = "";
-            if (val instanceof String) value = (String)val;
-            else value = String.valueOf(val);
+            String value;
+            if (val instanceof String) {
+                value = (String)val;
+            } else {
+                value = String.valueOf(val);
+            }
 
             param.add(new BasicNameValuePair(paramEntry.getKey(), value));
         }
@@ -101,7 +109,7 @@ public class Http {
         //创建 MultipartEntityBuilder,以此来构建我们的参数
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
         //设置字符编码，防止乱码
-        ContentType contentType = ContentType.create("text/plain",Charset.forName("UTF-8"));
+        ContentType contentType = ContentType.create("text/plain", StandardCharsets.UTF_8);
         //填充我们的文本内容，这里相当于input 框中的 name 与value
         for(Map.Entry<String, Object> entry: parameterMap.entrySet()) {
             String key = entry.getKey();
@@ -126,14 +134,18 @@ public class Http {
         if(null == parameterMap || parameterMap.size() == 0) {
             return "";
         }
-        String str = "";
+        StringBuilder str = new StringBuilder();
         for(Entry<String, Object> ent : parameterMap.entrySet()) {
             Object value = ent.getValue();
-            if(null == value) value = "";
-            str += "&" + ent.getKey() + "=" + URLEncoder.encode(String.valueOf(value), "UTF-8");
+            if(null == value) {
+                value = "";
+            }
+            str.append("&").append(ent.getKey()).append("=").append(URLEncoder.encode(String.valueOf(value), "UTF-8"));
         }
-        if(str.startsWith("&")) str = str.substring(1);
-        return str;
+        if (str.toString().startsWith("&")) {
+            str = new StringBuilder(str.substring(1));
+        }
+        return str.toString();
     }
 
     private byte[] transferByte(HttpEntity entity) throws IllegalStateException, IOException {
@@ -141,7 +153,7 @@ public class Http {
             this.charset = ContentType.getOrDefault(entity).getCharset();
         }
         if(null == this.charset) {
-            this.charset = Charset.forName("UTF-8");
+            this.charset = StandardCharsets.UTF_8;
         }
         InputStream is = entity.getContent();
 
@@ -185,7 +197,7 @@ public class Http {
      * 默认为application/x-www-form-urlencoded方式提交请求
      * @param url 请求地址
      * @param param 请求参数
-     * @return
+     * @return HttpRes
      */
     public HttpRes post(String url, Map<String, Object> param) {
         return this.post(url, param, false);
@@ -205,7 +217,9 @@ public class Http {
         }
 
         HttpPost httpPost = new HttpPost(url);
-        if(requestConfig != null) httpPost.setConfig(requestConfig);
+        if (requestConfig != null) {
+            httpPost.setConfig(requestConfig);
+        }
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
                 httpPost.addHeader(entry.getKey(), entry.getValue());
@@ -239,12 +253,14 @@ public class Http {
     }
 
     public HttpRes post(String url, String body) {
-        if(!url.matches("^http(s)?:\\/\\/.*$")) {
+        if (!url.matches("^http(s)?:\\/\\/.*$")) {
             url = "http://" + url;
         }
 
         HttpPost httpPost = new HttpPost(url);
-        if(requestConfig != null) httpPost.setConfig(requestConfig);
+        if (requestConfig != null) {
+            httpPost.setConfig(requestConfig);
+        }
         if(this.header != null && !this.header.isEmpty()) {
             for(Map.Entry<String, String> entry : this.header.entrySet()) {
                 httpPost.addHeader(entry.getKey(), entry.getValue());
@@ -325,8 +341,8 @@ public class Http {
 
     public String postWithCer(String httpsUrl, String xmlStr, String keyFile, String keyPassWord) throws Exception {
         KeyStore keyStore  = KeyStore.getInstance("PKCS12");
-        FileInputStream instream = new FileInputStream(new File(keyFile));//P12文件目录
-//    	InputStream instream = HTTPS.class.getResourceAsStream("/apiclient_cert.p12");
+        //P12文件目录
+        FileInputStream instream = new FileInputStream(new File(keyFile));
         try {
             keyStore.load(instream, keyPassWord.toCharArray());
         } finally {
@@ -360,7 +376,6 @@ public class Http {
                 String jsonStr = new String(this.transferByte(response.getEntity()));
 
                 //微信返回的报文时GBK，直接使用httpcore解析乱码
-                //  String jsonStr = EntityUtils.toString(response.getEntity(),"UTF-8");
                 EntityUtils.consume(entity);
                 return jsonStr;
             } finally {

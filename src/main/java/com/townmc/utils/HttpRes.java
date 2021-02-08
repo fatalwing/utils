@@ -5,13 +5,20 @@ import java.util.Map;
 
 /**
  * http请求结果
+ * @author meng
  */
 public class HttpRes {
-    // http请求状态码
+    /**
+     * http请求状态码
+     */
     private int status = 0;
-    // http请求结果数据
+    /**
+     * http请求结果数据
+     */
     private byte[] data;
-    // response headers
+    /**
+     * 请求返回的Header
+     */
     private Map<String, String> headers;
 
     /**
