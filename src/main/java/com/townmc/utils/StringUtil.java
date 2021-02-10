@@ -23,6 +23,12 @@ public class StringUtil {
     private static final Log log = LogFactory.getLog(StringUtil.class);
 
     /**
+     * 全局数组
+     */
+    private final static String[] hexDigits = { "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
+
+    /**
      * 生成uuid
      * @return String
      */
@@ -32,7 +38,7 @@ public class StringUtil {
     }
 
     /**
-     * 生成md5
+     * MD5加密
      * @param text String
      * @return String
      */
@@ -42,16 +48,16 @@ public class StringUtil {
             java.security.MessageDigest md5 = java.security.MessageDigest.getInstance("MD5");
             byte[] buf = text.getBytes();
             byte[] dig = md5.digest(buf);
-            String hex = null;
+            String hex;
             for (int i = 0; i < dig.length; i++) {
                 int n = dig[i] < 0 ? (256 + dig[i]) : dig[i];
                 hex = Integer.toHexString(n);
-                if (hex.length() < 2)
+                if (hex.length() < 2) {
                     hex = "0" + hex;
+                }
                 result += hex;
             }
         } catch (java.security.NoSuchAlgorithmException e) {
-            //e.printStackTrace();
             result = null;
         }
         return result;
@@ -92,38 +98,10 @@ public class StringUtil {
     }
 
     /**
-     * 转换字节数组为十六进制字符串
-     * @param bytes 字节数组
-     * @return 十六进制字符串
+     * SHA-1加密
+     * @param decript
+     * @return
      */
-    private static String byteArrayToHexString(byte[] bytes) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append(byteToHexString(bytes[i]));
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 全局数组
-     */
-    private final static String[] hexDigits = { "0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
-    /**
-     * 将一个字节转化成十六进制形式的字符串
-     * @param b 字节数组
-     * @return 字符串
-     */
-    private static String byteToHexString(byte b) {
-        int ret = b;
-        if (ret < 0) {
-            ret += 256;
-        }
-        int m = ret / 16;
-        int n = ret % 16;
-        return hexDigits[m] + hexDigits[n];
-    }
-
     public static String sha1(String decript) {
         try {
             MessageDigest digest = java.security.MessageDigest
@@ -148,6 +126,11 @@ public class StringUtil {
         return "";
     }
 
+    /**
+     * SHA加密
+     * @param decript
+     * @return
+     */
     public static String sha(String decript) {
         try {
             MessageDigest digest = java.security.MessageDigest
@@ -172,6 +155,33 @@ public class StringUtil {
         return "";
     }
 
+    /**
+     * 转换字节数组为十六进制字符串
+     * @param bytes 字节数组
+     * @return 十六进制字符串
+     */
+    private static String byteArrayToHexString(byte[] bytes) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append(byteToHexString(bytes[i]));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 将一个字节转化成十六进制形式的字符串
+     * @param b 字节数组
+     * @return 字符串
+     */
+    private static String byteToHexString(byte b) {
+        int ret = b;
+        if (ret < 0) {
+            ret += 256;
+        }
+        int m = ret / 16;
+        int n = ret % 16;
+        return hexDigits[m] + hexDigits[n];
+    }
 
     /**
      * 生成指定位数的随机数
@@ -187,46 +197,13 @@ public class StringUtil {
             sbbase.append("0");
         }
         String sbase = sbbase.toString();
-        String snum = null;
+        String snum;
         if (numt.length() < length) {
             snum = sbase.substring(0, length - numt.length()) + numt;
         } else {
             snum = numt.substring(0, length);
         }
         return snum;
-    }
-
-    /**
-     * 将inputstream转化为字符串
-     * @param is
-     * @return
-     */
-    public static String streamToString(InputStream is) {
-        /*
-          * To convert the InputStream to String we use the BufferedReader.readLine()
-          * method. We iterate until the BufferedReader return null which means
-          * there's no more data to read. Each line will appended to a StringBuilder
-          * and returned as String.
-          */
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-
-        String line = null;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return sb.toString();
     }
 
     /**
@@ -296,16 +273,26 @@ public class StringUtil {
     }
 
     /**
-     * 是否为数字（包括小数点）
+     * 判断一个字符串是否为数字（包括小数点）
      * @param str
      * @return
      */
     public static boolean isNumber(Object str) {
-        if (str instanceof Integer) return true;
-        if (str instanceof Long) return true;
-        if (str instanceof Double) return true;
-        if (str instanceof Float) return true;
-        if (str instanceof BigDecimal) return true;
+        if (str instanceof Integer) {
+            return true;
+        }
+        if (str instanceof Long) {
+            return true;
+        }
+        if (str instanceof Double) {
+            return true;
+        }
+        if (str instanceof Float) {
+            return true;
+        }
+        if (str instanceof BigDecimal) {
+            return true;
+        }
 
         if (str instanceof String) {
             String s = str.toString();
@@ -324,18 +311,25 @@ public class StringUtil {
      * @return
      */
     public static String chinaToUnicode(String str){
-        String result="";
+        String result = "";
         for (int i = 0; i < str.length(); i++){
-            int chr1 = (char) str.charAt(i);
-            if(chr1>=19968&&chr1<=171941){//汉字范围 \u4e00-\u9fa5 (中文)
-                result+="\\u" + Integer.toHexString(chr1);
+            int chr1 = str.charAt(i);
+            // 汉字范围 \u4e00-\u9fa5 (中文)
+            if(chr1>=19968&&chr1<=171941) {
+                result += "\\u" + Integer.toHexString(chr1);
             }else{
-                result+=str.charAt(i);
+                result += str.charAt(i);
             }
         }
         return result;
     }
 
+    /**
+     * 字符串去除指定字符
+     * @param str
+     * @param c
+     * @return
+     */
     public static String trim(String str, char c) {
         char[] chars = str.toCharArray();
         int len = chars.length;
@@ -349,6 +343,12 @@ public class StringUtil {
         return (st >0) && (len<chars.length)? str.substring(st, len): str;
     }
 
+    /**
+     * 去除字符串左侧指定字符
+     * @param str
+     * @param c
+     * @return
+     */
     public static String ltrim(String str, char c) {
         char[] chars = str.toCharArray();
         int len = chars.length;
@@ -359,6 +359,12 @@ public class StringUtil {
         return (st >0)? str.substring(st, len): str;
     }
 
+    /**
+     * 去除字符串右侧指定字符
+     * @param str
+     * @param c
+     * @return
+     */
     public static String rtrim(String str, char c) {
         char[] chars = str.toCharArray();
         int len = chars.length;
@@ -369,11 +375,20 @@ public class StringUtil {
         return (len<chars.length)? str.substring(st, len): str;
     }
 
+    /**
+     * 获得query string中某个参数的值
+     * 例如a=1&b=2&c=3 可以直接获得a或b或c的值
+     * @param queryString
+     * @param param
+     * @return
+     */
     public static String queryStringValue(String queryString, String param) {
         int start = queryString.indexOf(param + "=");
         start = start + param.length()+1;
 
-        if (start == -1) return null;
+        if (start == -1) {
+            return null;
+        }
 
         int andStart = queryString.substring(start).indexOf("&");
         int end = andStart != -1 ? start + andStart : queryString.length();
@@ -382,8 +397,15 @@ public class StringUtil {
         return value;
     }
 
+    /**
+     * 将query string转化为map
+     * @param queryString
+     * @return
+     */
     public static Map<String, String> queryStringMap(String queryString) {
-        if (isBlank(queryString)) return null;
+        if (isBlank(queryString)) {
+            return null;
+        }
 
         String[] pairArr = queryString.split("&");
 

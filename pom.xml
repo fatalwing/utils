@@ -135,9 +135,9 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/rxyor/carp</url>
-        <connection>scm:git:https://github.com/rxyor/carp.git</connection>
-        <developerConnection>scm:git:https://github.com/rxyor/carp</developerConnection>
+        <url>https://github.com/fatalwing/utils</url>
+        <connection>scm:git:https://github.com/fatalwing/utils.git</connection>
+        <developerConnection>scm:git:https://github.com/fatalwing/utils</developerConnection>
     </scm>
     <developers>
         <developer>
@@ -146,29 +146,7 @@
             <url>https://github.com/fatalwing</url>
         </developer>
     </developers>
-    <!--
-        <distributionManagement>
-           <repository>
-               <id>rdc-releases</id>
-               <url>https://repo.rdc.aliyun.com/repository/105179-release-2PXmgC/</url>
-           </repository>
-           <snapshotRepository>
-               <id>rdc-snapshots</id>
-               <url>https://repo.rdc.aliyun.com/repository/105179-snapshot-iArDoI/</url>
-           </snapshotRepository>
-       </distributionManagement>
 
-       <distributionManagement>
-           <repository>
-               <id>oss-releases</id>
-               <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-           </repository>
-           <snapshotRepository>
-               <id>oss-releases</id>
-               <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-           </snapshotRepository>
-       </distributionManagement>
-   -->
     <profiles>
         <profile>
             <id>release</id>

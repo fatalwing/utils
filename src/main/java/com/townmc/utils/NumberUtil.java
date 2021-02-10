@@ -24,18 +24,20 @@ public class NumberUtil {
      * @return
      */
     public static BigDecimal multiplay(Object one, Object two, int scale) {
-        boolean valid = false;
-        if(one != null && (one instanceof Number || (one instanceof String && one.toString().matches("\\d+(\\.\\d+)?")))) {
+        boolean valid;
+        if (one != null && (one instanceof Number || (one instanceof String && one.toString().matches("\\d+(\\.\\d+)?")))) {
             valid = true;
         } else {
             valid = false;
         }
-        if(two != null && (two instanceof Number || (two instanceof String && two.toString().matches("\\d+(\\.\\d+)?")))) {
+        if (two != null && (two instanceof Number || (two instanceof String && two.toString().matches("\\d+(\\.\\d+)?")))) {
             valid = true;
         } else {
             valid = false;
         }
-        if(!valid) throw new RuntimeException("invalid parameter.(" + one + "*" + two + ")");
+        if (!valid) {
+            throw new RuntimeException("invalid parameter.(" + one + "*" + two + ")");
+        }
         BigDecimal re = new BigDecimal(one.toString()).multiply(new BigDecimal(two.toString())).setScale(scale, BigDecimal.ROUND_HALF_UP);
         return re;
     }
@@ -49,17 +51,19 @@ public class NumberUtil {
      */
     public static BigDecimal divide(Object one, Object two, int scale) {
         boolean valid = false;
-        if(one != null && (one instanceof Number || (one instanceof String && one.toString().matches("\\d+(\\.\\d+)?")))) {
+        if (one != null && (one instanceof Number || (one instanceof String && one.toString().matches("\\d+(\\.\\d+)?")))) {
             valid = true;
         } else {
             valid = false;
         }
-        if(two != null && (two instanceof Number || (two instanceof String && two.toString().matches("\\d+(\\.\\d+)?")))) {
+        if (two != null && (two instanceof Number || (two instanceof String && two.toString().matches("\\d+(\\.\\d+)?")))) {
             valid = true;
         } else {
             valid = false;
         }
-        if(!valid) throw new RuntimeException("invalid parameter.(" + one + "/" + two + ")");
+        if (!valid) {
+            throw new RuntimeException("invalid parameter.(" + one + "/" + two + ")");
+        }
         BigDecimal re = new BigDecimal(one.toString()).divide(new BigDecimal(two.toString()),scale,BigDecimal.ROUND_HALF_UP);
         return re;
     }
