@@ -7,6 +7,27 @@
 
 ```java
 /**
+ * 时间精确到年月日时分秒
+ */
+public final static String FULL_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+/**
+ * 时间精确到年月日
+ */
+public final static String DATE_PATTERN = "yyyy-MM-dd";
+/**
+ * 时间精确到年月日小时
+ */
+public final static String DATE_HOUR_PATTERN = "yyyy-MM-dd HH";
+/**
+ * 时间精确到年月日小时
+ */
+public final static String DATE_MINUTE_PATTERN = "yyyy-MM-dd HH:mm";
+/**
+ * 时间精确到年月日，没有分隔符
+ */
+public final static String NOT_SEPARATOR_DATE_PATTERN = "yyyyMMdd";
+
+/**
  * 获得UTC时间
  * @return Date
  */

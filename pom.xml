@@ -6,7 +6,7 @@
 
     <groupId>com.townmc</groupId>
     <artifactId>townmc-utils</artifactId>
-    <version>3.5.1</version>
+    <version>3.6.1</version>
     <name>townmc-utils</name>
     <description>townmc-utils is project which contains common utils ,string, http request!
     </description>
